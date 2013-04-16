@@ -8,6 +8,9 @@ class Monad:
     def bind(cls, m, f):
         raise NotImplementedError
 
+    def sbind(self, f):
+        return self.bind(self, f)
+
 
 class Identity(Monad):
 
@@ -73,17 +76,17 @@ if __name__ == "__main__":
 
     m_id = Identity.unit(a)
     print "m_id", m_id
-    print Identity.bind(m_id, double)
+    print m_id.sbind(double)
 
     m_maybe = Maybe.unit(b)
     print "m_maybe", m_maybe
-    print Maybe.bind(m_maybe, double)
+    print m_maybe.sbind(double)
 
     m_maybe_not = Maybe.unit(None)
     print "m_maybe_not", m_maybe_not
-    print Maybe.bind(m_maybe_not, double)
+    print m_maybe_not.sbind(double)
 
     m_list = List(a, List(b, List(c)))
     print "m_list", m_list
-    print List.bind(m_list, double)
+    print m_list.sbind(double)
 
