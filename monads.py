@@ -1,3 +1,6 @@
+import operator
+
+
 class Monad:
 
     @classmethod
@@ -94,16 +97,44 @@ class List(Monad):
         return "List(%s, %s)" % (self.head, repr(self.tail))
 
 
+class Writer(Monad):
+
+    def __init__(self, x, log=None, combine=None):
+        self.x = x
+        self.log = log
+        if not combine:
+            combine = lambda xs, x: xs + [x]
+        self.combine = combine
+
+    @classmethod
+    def unit(cls, x):
+        return cls(x)
+
+    @classmethod
+    def bind(cls, m, f):
+        nx, nlog = f(m.x)
+        return cls(nx, m.combine(m.log, nlog))
+
+    def __repr__(self):
+        return "Writer(%s, %s)" % (self.x, self.log)
+
+    def run_writer(self):
+        return self.x, self.log
+
+    def exec_writer(self):
+        return self.x
+
+
 if __name__ == "__main__":
     square = lambda x: x * x
 
-    a, b, c = 2, 3, 4
+    squareWithLog = lambda x: (square(x), "squared(%s)" % x)
 
-    m_id = Identity.unit(a)
+    m_id = Identity.unit(2)
     print "m_id", m_id
     print m_id.sbind(square)
 
-    m_maybe = Maybe.unit(b)
+    m_maybe = Maybe.unit(3)
     print "m_maybe", m_maybe
     print m_maybe.sbind(square)
 
@@ -111,7 +142,7 @@ if __name__ == "__main__":
     print "m_maybe_not", m_maybe_not
     print m_maybe_not.sbind(square)
 
-    m_either_right = Either.unit(c)
+    m_either_right = Either.unit(4)
     print "m_either_right", m_either_right
     print m_either_right.sbind(square)
 
@@ -119,7 +150,18 @@ if __name__ == "__main__":
     print "m_either_left", m_either_left
     print m_either_left.sbind(square)
 
-    m_list = List(a, List(b, List(c)))
+    m_list = List(2, List(3, List(4)))
     print "m_list", m_list
     print m_list.sbind(square)
+
+    m_writer = Writer(5, log=[])
+#    m_writer2 = m_writer.sbind(square)
+    m_writer3 = m_writer.sbind(squareWithLog)
+    print "m_writer", m_writer
+#    print "m_writer2", m_writer2
+    print "m_writer3", m_writer3
+    print "m_writer3.run_writer", m_writer3.run_writer()
+    print "m_writer3.exec_writer", m_writer3.exec_writer()
+    m_writer4 = m_writer3.sbind(squareWithLog)
+    print "m_writer4.run_writer", m_writer4.run_writer()
 
