@@ -51,6 +51,9 @@ class Maybe(Monad):
         return "Maybe(%s)" % self.x
 
 
+Nothing = Maybe.unit(None)
+
+
 class Either(Monad):
 
     def __init__(self, left, right):
@@ -138,7 +141,7 @@ if __name__ == "__main__":
     print "m_maybe", m_maybe
     print m_maybe.sbind(square)
 
-    m_maybe_not = Maybe.unit(None)
+    m_maybe_not = Maybe.unit(None)  # Same as Nothing
     print "m_maybe_not", m_maybe_not
     print m_maybe_not.sbind(square)
 
